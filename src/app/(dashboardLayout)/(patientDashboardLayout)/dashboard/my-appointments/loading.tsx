@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MyAppointmentsLoading() {
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 p-4">
       {[...Array(4)].map((_, i) => (
         <Card key={i} className="p-6 border-muted/30">
           <div className="flex items-start justify-between">

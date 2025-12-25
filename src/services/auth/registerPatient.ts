@@ -47,7 +47,7 @@ export const registerPatient = async (
     }
 
     const res = await serverFetch.post("/user/create-patient", {
-      body: formData
+      body: newFormData
     })
 
     const result = await res.json()

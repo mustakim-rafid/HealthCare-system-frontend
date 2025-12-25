@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BookingConfirmationLoading() {
   return (
-    <div className="grid md:grid-cols-2 gap-6">
+    <div className="grid md:grid-cols-2 gap-6 p-4">
       <Card className="p-6">
         <div className="space-y-4">
           <Skeleton className="h-6 w-40" />

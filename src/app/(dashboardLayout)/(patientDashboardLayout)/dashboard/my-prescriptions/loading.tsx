@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function MyPrescriptionsLoading() {
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4 p-4">
       {[...Array(3)].map((_, i) => (
         <Card key={i} className="p-6 border-muted/30">
           <div className="space-y-4">
