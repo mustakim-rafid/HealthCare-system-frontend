@@ -1,0 +1,35 @@
+"use client";
+
+import { DateCell } from "@/components/shared/cells/cell/DateCell";
+import { StatusBadgeCell } from "@/components/shared/cells/cell/StatusBadgeCell";
+import { UserInfoCell } from "@/components/shared/cells/cell/UserInfoCell";
+import { Column } from "@/components/shared/ManagementTable";
+import { IAdmin } from "@/types/admin.interface";
+export const adminsColumns: Column<IAdmin>[] = [
+  {
+    header: "Admin",
+    accessor: (admin) => (
+      <UserInfoCell
+        name={admin.name}
+        email={admin.email}
+        photo={admin.profilePhoto}
+      />
+    ),
+  },
+  {
+    header: "Contact",
+    accessor: (admin) => (
+      <div className="flex flex-col">
+        <span className="text-sm">{admin.contactNumber}</span>
+      </div>
+    ),
+  },
+  {
+    header: "Status",
+    accessor: (admin) => <StatusBadgeCell isDeleted={admin.isDeleted} />,
+  },
+  {
+    header: "Joined",
+    accessor: (admin) => <DateCell date={admin.createdAt} />,
+  },
+];
