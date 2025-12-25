@@ -10,7 +10,12 @@ import { getAllDoctors } from "@/services/admin/doctorManagement";
 import { getAllSpecialities } from "@/services/admin/specialityManagement";
 import { ISpeciality } from "@/types/speciality.interface";
 import { formatQueryParams } from "@/utils/formatters";
+import { Metadata } from "next";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Health Care – Consultation",
+}
 
 export const revalidate = 600;
 

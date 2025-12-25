@@ -5,8 +5,13 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { CheckCircle, Shield, Users, Zap } from "lucide-react";
+import { Metadata } from "next";
 
 export const dynamic = "force-static";
+
+export const metadata: Metadata = {
+  title: "Health Care – Health Plans",
+}
 
 const HealthPlansPage = () => {
 

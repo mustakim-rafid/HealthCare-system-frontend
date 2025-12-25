@@ -8,6 +8,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Health Care – Register",
+}
 
 const RegisterPage = () => {
   return (

@@ -7,8 +7,13 @@ import {
 } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import DashboardNavbar from "@/components/module/Dashboard/DashboardNavbar"
+import { Metadata } from "next"
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Health Care – Dashboard",
+}
 
 const DashboardLayout = ({ children }: {
     children: ReactNode

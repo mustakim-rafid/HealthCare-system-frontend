@@ -2,6 +2,11 @@ export const dynamic = "force-dynamic";
 
 import LoginForm from "@/components/module/Auth/LoginForm"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Health Care – Login",
+}
 
 const LoginPage = async ({
   searchParams,

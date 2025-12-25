@@ -8,9 +8,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Award, Building2, Globe, HandHeart, Heart, Users } from "lucide-react";
+import { Metadata } from "next";
 import Link from "next/link";
 
 export const dynamic = "force-static";
+
+export const metadata: Metadata = {
+  title: "Health Care – NGOs",
+}
 
 const NGOsPage = () => {
   const ngoCategories = [
