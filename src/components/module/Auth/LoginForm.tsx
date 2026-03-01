@@ -25,6 +25,18 @@ const LoginForm = ({ redirect }: { redirect: string }) => {
     }
   }, [state]);
 
+  const fillDemo = (email: string, password: string) => {
+    const emailInput = document.getElementById("email") as HTMLInputElement;
+    const passwordInput = document.getElementById(
+      "password",
+    ) as HTMLInputElement;
+
+    if (emailInput && passwordInput) {
+      emailInput.value = email;
+      passwordInput.value = password;
+    }
+  };
+
   return (
     <form action={formAction}>
       <input type="hidden" name="redirect" value={redirect} />
@@ -67,6 +79,27 @@ const LoginForm = ({ redirect }: { redirect: string }) => {
           </div>
           <InputFieldError field="password" state={state} />
         </Field>
+
+        <Field>
+          <div className="grid gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fillDemo("naimur@mail.com", "123456")}
+            >
+              Quick Login - Doctor
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => fillDemo("noel@mail.com", "123456")}
+            >
+              Quick Login - Patient
+            </Button>
+          </div>
+        </Field>
+
         <Field>
           <Button type="submit" disabled={pending} className="cursor-pointer">
             {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Login"}
