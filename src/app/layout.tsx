@@ -20,7 +20,6 @@ export const metadata: Metadata = {
   title: "Health Care – Book Doctor Appointments & Video Consultations",
   description:
     "Access trusted healthcare services with Health Care. Find the right doctor, book video consultations, receive electronic prescriptions, make secure payments, and manage your health journey through a smart, role-based healthcare platform.",
-  icons: "/favicon.svg",
 };
 
 export default function RootLayout({

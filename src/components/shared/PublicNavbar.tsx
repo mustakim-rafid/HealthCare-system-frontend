@@ -12,6 +12,7 @@ import {
 import { ModeToggle } from "../ui/mode-toggler";
 import { getCookie } from "@/services/auth/tokenHandlers";
 import LogoutButton from "./LogoutButton";
+import Logo from "./Logo";
 import { getDefaultDashboardRoute } from "@/utils/auth-utils";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
@@ -49,15 +50,8 @@ export async function PublicNavbar() {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">
-                H
-              </span>
-            </div>
-            <span className="text-xl font-bold text-foreground sm:inline">
-              Health Care
-            </span>
+          <Link href="/" className="flex items-center rounded-md">
+            <Logo />
           </Link>
 
           {/* Desktop Navigation */}
@@ -106,11 +100,7 @@ export async function PublicNavbar() {
             <SheetContent side="right" className="w-[300px] sm:w-[400px]">
               <SheetHeader>
                 <SheetTitle className="text-lg font-semibold">
-                  <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                    <span className="text-primary-foreground font-bold text-lg">
-                      H
-                    </span>
-                  </div>
+                  <Logo textClassName="text-lg" />
                 </SheetTitle>
               </SheetHeader>
 

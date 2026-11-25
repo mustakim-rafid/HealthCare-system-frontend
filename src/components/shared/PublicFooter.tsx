@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Logo from "./Logo";
 
 function PublicFooter() {
   return (
@@ -6,15 +7,8 @@ function PublicFooter() {
       <div className="container mx-auto px-8 py-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
           <div className="space-y-3">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">
-                  H
-                </span>
-              </div>
-              <span className="text-xl font-bold text-foreground sm:inline">
-                Health Care
-              </span>
+            <Link href="/" className="inline-flex items-center rounded-md">
+              <Logo />
             </Link>
             <p className="text-sm text-muted-foreground">
               Your health is our priority. We are here to provide the best
