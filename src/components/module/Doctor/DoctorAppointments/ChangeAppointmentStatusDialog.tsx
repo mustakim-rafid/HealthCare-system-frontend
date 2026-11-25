@@ -43,10 +43,11 @@ export default function ChangeAppointmentStatusDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const statusOptions = [
-    { value: AppointmentStatus.SCHEDULED, label: "Scheduled" },
+    // Only transitions a doctor may perform; the server validates them again
     { value: AppointmentStatus.INPROGRESS, label: "In Progress" },
     { value: AppointmentStatus.COMPLETED, label: "Completed" },
-    { value: AppointmentStatus.CANCELED, label: "Canceled" },
+    { value: AppointmentStatus.NO_SHOW, label: "No-show" },
+    { value: AppointmentStatus.CANCELLED, label: "Cancelled (refunds the patient)" },
   ];
 
   const handleSubmit = async () => {

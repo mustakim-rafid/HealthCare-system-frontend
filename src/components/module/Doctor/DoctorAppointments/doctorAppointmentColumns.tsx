@@ -3,34 +3,9 @@ import { Column } from "@/components/shared/ManagementTable";
 import { Badge } from "@/components/ui/badge";
 import {
   AppointmentStatus,
-  IAppointment,
-} from "@/types/appointments.interface";
+  IAppointment, STATUS_META } from "@/types/appointments.interface";
 import { format } from "date-fns";
 import AppointmentCountdown from "../../Patient/PatientAppointment/AppointmentCountdown";
-
-const statusConfig: Record<
-  AppointmentStatus,
-  { variant: any; label: string; className?: string }
-> = {
-  [AppointmentStatus.SCHEDULED]: {
-    variant: "default",
-    label: "Scheduled",
-    className: "bg-blue-500 hover:bg-blue-600",
-  },
-  [AppointmentStatus.INPROGRESS]: {
-    variant: "secondary",
-    label: "In Progress",
-  },
-  [AppointmentStatus.COMPLETED]: {
-    variant: "default",
-    label: "Completed",
-    className: "bg-green-500 hover:bg-green-600",
-  },
-  [AppointmentStatus.CANCELED]: {
-    variant: "destructive",
-    label: "Canceled",
-  },
-};
 
 export const doctorAppointmentColumns: Column<IAppointment>[] = [
   {
@@ -62,7 +37,7 @@ export const doctorAppointmentColumns: Column<IAppointment>[] = [
             {format(new Date(appointment.schedule.startDateTime), "h:mm a")} -{" "}
             {format(new Date(appointment.schedule.endDateTime), "h:mm a")}
           </p>
-          {appointment.status === AppointmentStatus.SCHEDULED &&
+          {[AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED].includes(appointment.status) &&
             appointment.schedule.startDateTime && (
               <div className="pt-1">
                 <AppointmentCountdown
@@ -78,9 +53,9 @@ export const doctorAppointmentColumns: Column<IAppointment>[] = [
   {
     header: "Status",
     accessor: (appointment) => {
-      const config = statusConfig[appointment.status];
+      const config = STATUS_META[appointment.status] ?? { label: appointment.status, className: "" };
       return (
-        <Badge variant={config.variant} className={config.className}>
+        <Badge variant="outline" className={config.className}>
           {config.label}
         </Badge>
       );

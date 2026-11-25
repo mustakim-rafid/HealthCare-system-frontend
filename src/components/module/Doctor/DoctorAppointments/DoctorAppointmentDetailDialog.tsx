@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import AppointmentCountdown from "../../Patient/PatientAppointment/AppointmentCountdown";
+import DoctorBookingTools from "./DoctorBookingTools";
 
 interface DoctorAppointmentDetailDialogProps {
   appointment: IAppointment | null;
@@ -232,6 +233,8 @@ export default function DoctorAppointmentDetailDialog({
             {/* Only layout responsiveness applied above */}
           </div>
         </div>
+
+        <DoctorBookingTools appointment={appointment} />
 
         <div className="flex justify-end pt-4 border-t">
           <Button variant="outline" onClick={handleClose}>
