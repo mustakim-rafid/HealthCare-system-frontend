@@ -15,7 +15,7 @@ interface LogoMarkProps {
  */
 export function LogoMark({ size = 32, className }: LogoMarkProps) {
   // Unique gradient id so several logos on one page never clash.
-  const gradientId = `hc-logo-gradient-${useId().replace(/:/g, "")}`;
+  const gradientId = `hc-logo-gradient-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   return (
     <svg
