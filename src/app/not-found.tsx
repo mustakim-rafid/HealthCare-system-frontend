@@ -13,7 +13,8 @@ export default function NotFound() {
   return (
     <main
       id="main-content"
-      className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-background px-4 py-16"
+      tabIndex={-1}
+      className="relative outline-none flex min-h-screen w-full items-center justify-center overflow-hidden bg-background px-4 py-16"
     >
       {/* Soft brand glow */}
       <div

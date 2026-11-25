@@ -33,7 +33,10 @@ const DashboardLayout = ({ children }: {
           </div>
         </header>
         <Separator />
-        {children}
+        {/* SidebarInset already renders <main>, so the skip-link target is a div */}
+        <div id="main-content" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

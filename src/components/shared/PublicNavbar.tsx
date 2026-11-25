@@ -92,7 +92,7 @@ export async function PublicNavbar() {
             {/* Trigger button (hamburger icon) */}
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon" aria-label="Open menu">
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6" aria-hidden="true" />
               </Button>
             </SheetTrigger>
 
