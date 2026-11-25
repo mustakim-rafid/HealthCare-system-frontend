@@ -2,9 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  createAppointmentWithPayLater,
-} from "@/services/patient/appointment.service";
+import { createAppointment } from "@/services/patient/appointment.service";
 import { IDoctor } from "@/types/doctor.interface";
 import { ISchedule } from "@/types/schedule.interface";
 import { format } from "date-fns";
@@ -36,25 +34,30 @@ const AppointmentConfirmation = ({
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
 
+  // Reserve the slot (held while paying) and continue to the existing Stripe checkout.
   const handlePayLater = async () => {
+    if (isPayingLater) return;
     setIsPayingLater(true);
 
     try {
-      const result = await createAppointmentWithPayLater({
+      const result = await createAppointment({
         doctorId: doctor.id!,
         scheduleId: schedule.id,
       });
 
       if (result.success) {
+        const paymentUrl = result.data?.paymentUrl;
+        const appointmentId = result.data?.appointment?.id;
+        if (paymentUrl) {
+          toast.success("Slot reserved. Redirecting to secure payment…");
+          window.location.href = paymentUrl;
+          return;
+        }
         setBookingSuccess(true);
-        toast.success(
-          "Appointment booked! You can pay later from your appointments page."
-        );
-
-        // Redirect after 2 seconds
+        toast.success("Slot reserved. Complete the payment from the booking page to confirm it.");
         setTimeout(() => {
-          router.push("/dashboard/my-appointments");
-        }, 2000);
+          router.push(appointmentId ? `/dashboard/my-appointments/${appointmentId}` : "/dashboard/my-appointments");
+        }, 1500);
       } else {
         toast.error(result.message || "Failed to book appointment");
         setIsPayingLater(false);
@@ -77,14 +80,14 @@ const AppointmentConfirmation = ({
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-green-900">
-                  Appointment Confirmed!
+                  Slot reserved!
                 </h2>
                 <p className="text-green-700 mt-2">
-                  Your appointment has been successfully booked
+                  Complete the payment to confirm your appointment
                 </p>
               </div>
               <p className="text-sm text-green-600">
-                Redirecting to your appointments...
+                Redirecting to your booking...
               </p>
             </div>
           </CardContent>
@@ -205,7 +208,7 @@ const AppointmentConfirmation = ({
                   Consultation Fee
                 </span>
                 <span className="text-xl font-bold text-primary">
-                  ${doctor.appointmentFee}
+                  ৳{doctor.appointmentFee}
                 </span>
               </div>
             </div>
@@ -252,7 +255,7 @@ const AppointmentConfirmation = ({
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>
                   <span>
-                    Please arrive 10 minutes before your scheduled time
+                    Your slot is held for 30 minutes while you pay; unpaid holds are released automatically
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
@@ -264,13 +267,13 @@ const AppointmentConfirmation = ({
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>
                   <span>
-                    You can cancel or reschedule from your appointments page
+                    Free cancellation with full refund up to 24 hours before the start time
                   </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>
                   <span>
-                    A confirmation will be sent to your registered email
+                    Your doctor shares the Google Meet link after confirmation; you get a reminder 10 minutes before
                   </span>
                 </li>
               </ul>
@@ -281,20 +284,19 @@ const AppointmentConfirmation = ({
             <div className="space-y-3 pt-2">
               <Button
                 onClick={handlePayLater}
-                disabled={isBooking}
-                variant="outline"
+                disabled={isBooking || isPayingLater}
                 className="w-full"
                 size="lg"
               >
                 {isPayingLater ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Booking Appointment...
+                    Reserving your slot...
                   </>
                 ) : (
                   <>
                     <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Book Now, Pay Later
+                    Confirm & Pay ৳{doctor.appointmentFee}
                   </>
                 )}
               </Button>

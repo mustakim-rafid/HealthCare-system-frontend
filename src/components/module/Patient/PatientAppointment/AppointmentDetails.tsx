@@ -1,478 +1,314 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { format } from "date-fns";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { format, formatDistanceToNowStrict } from "date-fns";
+import { toast } from "sonner";
 import {
-  AlertCircle,
-  Calendar,
+  AlertTriangle,
+  ArrowLeft,
+  CalendarClock,
   CheckCircle2,
   Clock,
   CreditCard,
+  FileText,
   Loader2,
-  MapPin,
-  Phone,
   Star,
   Stethoscope,
-  User,
+  XCircle,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-// import ReviewDialog from "./ReviewDialog";
-import { changeAppointmentStatus } from "@/services/patient/appointment.service";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  AppointmentStatus,
-  IAppointment,
-  PaymentStatus,
-} from "@/types/appointments.interface";
-import { toast } from "sonner";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cancelAppointment, payForAppointment, respondToPostponement } from "@/services/patient/appointment.service";
+import { IAppointment, PaymentStatus, STATUS_META } from "@/types/appointments.interface";
 import AppointmentCountdown from "./AppointmentCountdown";
 import ReviewDialog from "./ReviewDialog";
+import MessageThread from "../../Booking/MessageThread";
+import AddToCalendar from "../../Booking/AddToCalendar";
+import JoinMeetingButton from "../../Booking/JoinMeetingButton";
 
-interface AppointmentDetailProps {
-  appointment: IAppointment;
-}
-
-const AppointmentDetails = ({ appointment }: AppointmentDetailProps) => {
-  const router = useRouter();
-  const [showReviewDialog, setShowReviewDialog] = useState(false);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
-
-  const isCompleted = appointment.status === AppointmentStatus.COMPLETED;
-  const isCanceled = appointment.status === AppointmentStatus.CANCELED;
-  const isScheduled = appointment.status === AppointmentStatus.SCHEDULED;
-  const canReview =
-    isCompleted &&
-    !appointment.review &&
-    appointment.paymentStatus === PaymentStatus.PAID;
-  const canCancel = isScheduled && !isCanceled;
-
-  const handleCancelAppointment = async () => {
-    if (!confirm("Are you sure you want to cancel this appointment?")) {
-      return;
-    }
-
-    setIsCancelling(true);
-    try {
-      const result = await changeAppointmentStatus(
-        appointment.id,
-        AppointmentStatus.CANCELED
-      );
-
-      if (result.success) {
-        toast.success("Appointment cancelled successfully");
-        router.refresh();
-      } else {
-        toast.error(result.message || "Failed to cancel appointment");
-      }
-    } catch (error) {
-      toast.error("An error occurred while cancelling appointment");
-      console.error(error);
-    } finally {
-      setIsCancelling(false);
-    }
-  };
-
-  const getStatusBadge = (status: AppointmentStatus) => {
-    const statusConfig: Record<
-      AppointmentStatus,
-      { variant: any; label: string; className?: string }
-    > = {
-      [AppointmentStatus.SCHEDULED]: {
-        variant: "default",
-        label: "Scheduled",
-        className: "bg-blue-500 hover:bg-blue-600",
-      },
-      [AppointmentStatus.INPROGRESS]: {
-        variant: "secondary",
-        label: "In Progress",
-      },
-      [AppointmentStatus.COMPLETED]: {
-        variant: "default",
-        label: "Completed",
-        className: "bg-green-500 hover:bg-green-600",
-      },
-      [AppointmentStatus.CANCELED]: {
-        variant: "destructive",
-        label: "Canceled",
-      },
-    };
-
-    const config = statusConfig[status];
-    return (
-      <Badge variant={config.variant} className={config.className}>
-        {config.label}
-      </Badge>
-    );
-  };
+export const StatusBadge = ({ status }: { status: string }) => {
+  const meta = STATUS_META[status] ?? { label: status, className: "" };
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <Badge variant="outline" className={meta.className}>
+      {meta.label}
+    </Badge>
+  );
+};
+
+const AppointmentDetails = ({ appointment }: { appointment: IAppointment }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [pending, startTransition] = useTransition();
+  const [showReview, setShowReview] = useState(false);
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [reason, setReason] = useState("");
+
+  const { doctor, schedule, status, paymentStatus } = appointment;
+  const start = new Date(schedule!.startDateTime);
+  const end = new Date(schedule!.endDateTime);
+  const isPaid = paymentStatus === PaymentStatus.PAID;
+  const awaitingPayment = (status === "PENDING_PAYMENT" || status === "SCHEDULED") && paymentStatus === PaymentStatus.UNPAID;
+  const isActive = ["PENDING_PAYMENT", "SCHEDULED", "CONFIRMED", "POSTPONED"].includes(status);
+  const review = appointment.review ?? appointment.Review;
+  const canReview = status === "COMPLETED" && isPaid && !review;
+  const policy = appointment.policy;
+  const cancelBlocked = isPaid && policy && !policy.canCancelWithRefund && status !== "POSTPONED";
+
+  useEffect(() => {
+    if (searchParams.get("payment") === "cancelled") toast.info("Payment was cancelled. Your slot is still held for a short time.");
+  }, [searchParams]);
+
+  const run = (fn: () => Promise<{ success: boolean; message?: string; data?: any }>, success: string, after?: (data: any) => void) =>
+    startTransition(async () => {
+      const res = await fn();
+      if (res.success) {
+        toast.success(success);
+        after?.(res.data);
+        router.refresh();
+      } else toast.error(res.message || "Something went wrong");
+    });
+
+  const pay = () =>
+    startTransition(async () => {
+      const res = await payForAppointment(appointment.id);
+      if (res.success && res.data?.paymentUrl) window.location.href = res.data.paymentUrl;
+      else toast.error(res.message || "Could not start payment");
+    });
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Appointment Details
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            Complete information about your appointment
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {canCancel && (
-            <Button
-              variant="destructive"
-              onClick={handleCancelAppointment}
-              disabled={isCancelling}
-            >
-              {isCancelling ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Cancelling...
-                </>
-              ) : (
-                "Cancel Appointment"
-              )}
-            </Button>
-          )}
-          <Button variant="outline" onClick={() => router.back()}>
-            Back
+          <Button variant="ghost" size="sm" asChild className="-ml-3 mb-2">
+            <Link href="/dashboard/my-appointments">
+              <ArrowLeft className="mr-1 h-4 w-4" aria-hidden /> My appointments
+            </Link>
           </Button>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Appointment details</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Booking #{appointment.id.slice(0, 8)}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusBadge status={status} />
+          <Badge variant="outline">{paymentStatus === "REFUNDED" ? "Refunded" : isPaid ? "Paid" : "Unpaid"}</Badge>
         </div>
       </div>
 
-      {/* Review Notification - Only show if can review (completed but no review) */}
-      {canReview && (
-        <Card className="border-amber-200 bg-muted">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-amber-900">
-                  Review This Appointment
-                </h3>
-                <p className="text-sm text-amber-700 mt-1">
-                  Your appointment has been completed. Share your experience by
-                  leaving a review for Dr. {appointment.doctor?.name}.
-                </p>
-                <Button
-                  onClick={() => setShowReviewDialog(true)}
-                  className="mt-3"
-                  size="sm"
-                >
-                  Write a Review
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Cannot Review Yet - Only show if not completed and no review */}
-      {!isCompleted && !appointment.review && (
-        <Card className="border-blue-200 bg-muted">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
+      {/* Action banners */}
+      {awaitingPayment && (
+        <Card className="border-amber-500/40 bg-amber-500/5">
+          <CardContent className="flex flex-col gap-4 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-3">
+              <CreditCard className="mt-0.5 h-5 w-5 text-amber-600" aria-hidden />
               <div>
-                <h3 className="font-semibold text-primar">
-                  Review Not Available Yet
-                </h3>
-                <p className="text-sm text-primar mt-1">
-                  You can review this appointment after it has been completed.
+                <p className="font-semibold">Complete payment to confirm your booking</p>
+                <p className="text-sm text-muted-foreground">
+                  {appointment.holdExpiresAt
+                    ? `Your slot is held for ${formatDistanceToNowStrict(new Date(appointment.holdExpiresAt))}. Unpaid holds are released automatically.`
+                    : "Pay now to confirm this appointment."}
                 </p>
               </div>
+            </div>
+            <Button onClick={pay} disabled={pending || policy?.paymentEnabled === false} size="lg">
+              {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CreditCard className="mr-2 h-4 w-4" />}
+              Pay {doctor?.appointmentFee ? `৳${doctor.appointmentFee}` : "now"}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {status === "POSTPONED" && appointment.proposedSchedule && (
+        <Card className="border-orange-500/40 bg-orange-500/5">
+          <CardContent className="space-y-4 pt-6">
+            <div className="flex gap-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 text-orange-600" aria-hidden />
+              <div>
+                <p className="font-semibold">Your doctor postponed this appointment</p>
+                {appointment.postponeMessage && <p className="mt-1 text-sm italic">“{appointment.postponeMessage}”</p>}
+                <p className="mt-2 text-sm">
+                  Proposed new time: <strong>{format(new Date(appointment.proposedSchedule.startDateTime), "EEEE, MMM d · h:mm a")}</strong>
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button disabled={pending} onClick={() => run(() => respondToPostponement(appointment.id, "accept"), "New time confirmed")}>
+                <CheckCircle2 className="mr-2 h-4 w-4" /> Accept new time
+              </Button>
+              <Button
+                variant="outline"
+                disabled={pending}
+                onClick={() => run(() => respondToPostponement(appointment.id, "cancel"), "Appointment cancelled and refund requested")}
+              >
+                <XCircle className="mr-2 h-4 w-4" /> Cancel & refund
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Doctor Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Doctor Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-2xl font-semibold">
-                {appointment.doctor?.name || "N/A"}
-              </p>
-              <p className="text-muted-foreground">
-                {appointment.doctor?.designation || "Doctor"}
-              </p>
+      {canReview && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="flex flex-col gap-3 pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-3">
+              <Star className="mt-0.5 h-5 w-5 text-amber-500" aria-hidden />
+              <p className="font-medium">How was your consultation with {doctor?.name}? Leave a quick review.</p>
             </div>
-
-            <Separator />
-
-            {appointment.doctor?.doctorSpeciality &&
-              appointment.doctor.doctorSpeciality.length > 0 && (
-                <>
-                  <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Stethoscope className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Specialties</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {appointment.doctor.doctorSpeciality.map((ds, idx) => (
-                        <Badge key={idx} variant="secondary">
-                          {ds.speciality?.title || "N/A"}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <Separator />
-                </>
-              )}
-
-            <div className="space-y-2">
-              {appointment.doctor?.qualification && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Qualification:</span>
-                  <span className="font-medium">
-                    {appointment.doctor.qualification}
-                  </span>
-                </div>
-              )}
-
-              {appointment.doctor?.experience !== undefined && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Experience:</span>
-                  <span className="font-medium">
-                    {appointment.doctor.experience} years
-                  </span>
-                </div>
-              )}
-
-              {appointment.doctor?.currentWorkingPlace && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Working at:</span>
-                  <span className="font-medium">
-                    {appointment.doctor.currentWorkingPlace}
-                  </span>
-                </div>
-              )}
-            </div>
-
-            <Separator />
-
-            <div className="space-y-2">
-              {appointment.doctor?.contactNumber && (
-                <div className="flex items-center gap-2 text-sm">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{appointment.doctor.contactNumber}</span>
-                </div>
-              )}
-
-              {appointment.doctor?.address && (
-                <div className="flex items-start gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <span>{appointment.doctor.address}</span>
-                </div>
-              )}
-            </div>
-
-            {appointment.doctor?.appointmentFee !== undefined && (
-              <>
-                <Separator />
-                <div className="bg-muted border border-blue-200 rounded-lg p-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-primary">
-                      Consultation Fee
-                    </span>
-                    <span className="text-xl font-bold text-primary">
-                      ${appointment.doctor.appointmentFee}
-                    </span>
-                  </div>
-                </div>
-              </>
-            )}
+            <Button onClick={() => setShowReview(true)}>Write a review</Button>
           </CardContent>
         </Card>
+      )}
 
-        {/* Appointment Details */}
-        <div className="space-y-6 lg:col-span-1">
-          {/* Status */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Appointment Status</CardTitle>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarClock className="h-4 w-4" aria-hidden /> Schedule
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  Current Status
-                </span>
-                {getStatusBadge(appointment.status)}
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-xl font-semibold">{format(start, "EEEE, MMMM d, yyyy")}</p>
+                <p className="flex items-center gap-2 text-muted-foreground">
+                  <Clock className="h-4 w-4" aria-hidden />
+                  {format(start, "h:mm a")} – {format(end, "h:mm a")} <span className="text-xs">(your local time)</span>
+                </p>
               </div>
+              {isActive && start > new Date() && <AppointmentCountdown appointmentDateTime={start} />}
+              {(status === "CONFIRMED" || status === "SCHEDULED") && isPaid && (
+                <AddToCalendar
+                  id={appointment.id}
+                  title={`Consultation with ${doctor?.name ?? "your doctor"}`}
+                  description={`Health Care video consultation.${appointment.meetLink ? ` Join: ${appointment.meetLink}` : ""}`}
+                  start={start}
+                  end={end}
+                  location={appointment.meetLink}
+                />
+              )}
+              {status === "CANCELLED" && (
+                <p className="rounded-md bg-muted p-3 text-sm">
+                  Cancelled{appointment.cancelledAt ? ` on ${format(new Date(appointment.cancelledAt), "PPp")}` : ""}
+                  {appointment.cancelReason ? ` — ${appointment.cancelReason}` : ""}.
+                  {paymentStatus === "REFUNDED" && " Your payment was refunded."}
+                </p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Schedule */}
-          {appointment.schedule && (
+          <MessageThread appointmentId={appointment.id} viewerRole="PATIENT" />
+        </div>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Video consultation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {appointment.meetLink ? (
+                <JoinMeetingButton meetLink={appointment.meetLink} start={start} end={end} />
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  {isPaid && ["CONFIRMED", "SCHEDULED", "INPROGRESS"].includes(status)
+                    ? "Your doctor will share the Google Meet link here before the consultation. You will get a notification."
+                    : "The meeting link appears here once your booking is paid and confirmed."}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Stethoscope className="h-4 w-4" aria-hidden /> Doctor
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <p className="text-base font-semibold">{doctor?.name}</p>
+              <p className="text-muted-foreground">{doctor?.designation}</p>
+              {doctor?.qualification && <p>{doctor.qualification}</p>}
+              {doctor?.currentWorkingPlace && <p className="text-muted-foreground">{doctor.currentWorkingPlace}</p>}
+              <p className="pt-2">
+                Fee: <strong>৳{appointment.payment?.amount ?? doctor?.appointmentFee}</strong>
+              </p>
+            </CardContent>
+          </Card>
+
+          {appointment.prescription && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Schedule
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <FileText className="h-4 w-4" aria-hidden /> Prescription
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="bg-muted border border-blue-200 rounded-lg p-4 space-y-3">
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">Date</p>
-                    <p className="text-xl font-bold text-foreground">
-                      {format(
-                        new Date(appointment.schedule.startDateTime),
-                        "EEEE"
-                      )}
-                    </p>
-                    <p className="text-foreground">
-                      {format(
-                        new Date(appointment.schedule.startDateTime),
-                        "MMMM d, yyyy"
-                      )}
-                    </p>
-                  </div>
-
-                  <Separator className="bg-blue-200" />
-
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-foreground" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Time</p>
-                      <p className="font-semibold text-foreground">
-                        {format(
-                          new Date(appointment.schedule.startDateTime),
-                          "h:mm a"
-                        )}{" "}
-                        -{" "}
-                        {format(
-                          new Date(appointment.schedule.endDateTime),
-                          "h:mm a"
-                        )}
-                      </p>
-                    </div>
-                  </div>
-
-                  {appointment.status === AppointmentStatus.SCHEDULED &&
-                    appointment.schedule.startDateTime && (
-                      <>
-                        <Separator className="bg-blue-200" />
-                        <div className="pt-2">
-                          <AppointmentCountdown
-                            appointmentDateTime={
-                              appointment.schedule.startDateTime
-                            }
-                            className="text-foreground"
-                          />
-                        </div>
-                      </>
-                    )}
-                </div>
+              <CardContent className="space-y-2 text-sm">
+                <p className="whitespace-pre-wrap">{appointment.prescription.instructions}</p>
+                <Button variant="link" className="h-auto p-0" asChild>
+                  <Link href="/dashboard/my-prescriptions">View all prescriptions</Link>
+                </Button>
               </CardContent>
             </Card>
           )}
 
-          {/* Prescription */}
-          {appointment.prescription && (
-            <Card className="border-green-200">
+          {isActive && (
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-700">
-                  <CheckCircle2 className="h-5 w-5" />
-                  Prescription Available
-                </CardTitle>
+                <CardTitle className="text-base">Cancellation</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="bg-green-50 rounded-lg p-3 space-y-2">
-                  <div>
-                    <span className="text-sm font-medium text-green-900">
-                      Instructions:
-                    </span>
-                    <p className="text-sm text-green-700 mt-1">
-                      {appointment.prescription.instructions}
-                    </p>
-                  </div>
-
-                  {appointment.prescription.followUpDate && (
-                    <div>
-                      <span className="text-sm font-medium text-green-900">
-                        Follow-up Date:
-                      </span>
-                      <p className="text-sm text-green-700">
-                        {format(
-                          new Date(appointment.prescription.followUpDate),
-                          "MMMM d, yyyy"
-                        )}
-                      </p>
-                    </div>
-                  )}
-                </div>
+              <CardContent className="space-y-3 text-sm">
+                <p className="text-muted-foreground">
+                  {isPaid
+                    ? `Free cancellation with a full refund up to ${policy?.cancellationCutoffHours ?? 24} hours before the start time.`
+                    : "Unpaid bookings can be cancelled at any time."}
+                </p>
+                <Button variant="destructive" className="w-full" disabled={pending || !!cancelBlocked} onClick={() => setConfirmCancel(true)}>
+                  Cancel appointment
+                </Button>
+                {cancelBlocked && <p className="text-xs text-muted-foreground">The cancellation window has passed.</p>}
               </CardContent>
             </Card>
           )}
         </div>
       </div>
 
-      {/* Review Section - Full Width Below */}
-      {appointment.review && (
-        <Card className="border-yellow-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-yellow-700">
-              <Star className="h-5 w-5 fill-yellow-600" />
-              Your Review
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="bg-yellow-50 rounded-lg p-4 space-y-3">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`h-5 w-5 ${
-                      star <= appointment.review!.rating
-                        ? "fill-yellow-500 text-yellow-500"
-                        : "text-gray-300"
-                    }`}
-                  />
-                ))}
-                <span className="ml-2 text-sm font-medium text-yellow-900">
-                  {appointment.review.rating}/5
-                </span>
-              </div>
+      <AlertDialog open={confirmCancel} onOpenChange={setConfirmCancel}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel this appointment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isPaid ? "Your payment will be refunded in full. " : ""}The slot will be released for other patients.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <label htmlFor="cancel-reason" className="text-sm font-medium">
+            Reason (optional)
+          </label>
+          <Textarea id="cancel-reason" value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep appointment</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={pending}
+              onClick={() => run(() => cancelAppointment(appointment.id, reason || undefined), "Appointment cancelled")}
+            >
+              Yes, cancel
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-              {appointment.review.comment && (
-                <div>
-                  <p className="text-sm text-yellow-900 font-medium mb-1">
-                    Comment:
-                  </p>
-                  <p className="text-sm text-yellow-800">
-                    {appointment.review.comment}
-                  </p>
-                </div>
-              )}
-
-              <p className="text-xs text-yellow-600 italic">
-                Reviews cannot be edited or deleted once submitted.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Review Dialog */}
-      {canReview && (
-        <ReviewDialog
-          isOpen={showReviewDialog}
-          onClose={() => setShowReviewDialog(false)}
-          appointmentId={appointment.id}
-          doctorName={appointment.doctor?.name || "the doctor"}
-        />
+      {doctor && (
+        <ReviewDialog isOpen={showReview} onClose={() => { setShowReview(false); router.refresh(); }} appointmentId={appointment.id} doctorName={doctor.name} />
       )}
     </div>
   );

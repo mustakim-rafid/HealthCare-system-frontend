@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   AppointmentStatus,
-  IAppointment,
-} from "@/types/appointments.interface";
+  IAppointment, STATUS_META } from "@/types/appointments.interface";
 import { format } from "date-fns";
 import {
   Calendar,
@@ -28,33 +27,9 @@ interface AppointmentsListProps {
 
 const AppointmentsList = ({ appointments }: AppointmentsListProps) => {
   const getStatusBadge = (status: AppointmentStatus) => {
-    const statusConfig: Record<
-      AppointmentStatus,
-      { variant: any; label: string; className?: string }
-    > = {
-      [AppointmentStatus.SCHEDULED]: {
-        variant: "default",
-        label: "Scheduled",
-        className: "bg-blue-500 hover:bg-blue-600",
-      },
-      [AppointmentStatus.INPROGRESS]: {
-        variant: "secondary",
-        label: "In Progress",
-      },
-      [AppointmentStatus.COMPLETED]: {
-        variant: "default",
-        label: "Completed",
-        className: "bg-green-500 hover:bg-green-600",
-      },
-      [AppointmentStatus.CANCELED]: {
-        variant: "destructive",
-        label: "Canceled",
-      },
-    };
-
-    const config = statusConfig[status];
+    const config = STATUS_META[status] ?? { label: status, className: "" };
     return (
-      <Badge variant={config.variant} className={config.className}>
+      <Badge variant="outline" className={config.className}>
         {config.label}
       </Badge>
     );
@@ -177,7 +152,7 @@ const AppointmentsList = ({ appointments }: AppointmentsListProps) => {
                     )}
                   </span>
                 </div>
-                {appointment.status === AppointmentStatus.SCHEDULED &&
+                {[AppointmentStatus.SCHEDULED, AppointmentStatus.CONFIRMED].includes(appointment.status) &&
                   appointment.schedule.startDateTime && (
                     <div className="pt-2 border-t border-gray-200">
                       <AppointmentCountdown
