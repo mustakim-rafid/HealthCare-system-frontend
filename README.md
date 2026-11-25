@@ -50,14 +50,13 @@ Data is fetched in Server Components / Server Actions through `src/lib/serverFet
 
 `Awaiting payment → Confirmed → In progress → Completed` (or `No-show`); `Confirmed ⇄ Postponed`; any active booking can become `Cancelled`. Unpaid holds expire after 30 minutes; finished consultations complete automatically. Patients can cancel paid bookings up to 24 hours before the start for a full refund.
 
-All times are stored in UTC and displayed in the viewer's local time.
+All times are stored in UTC and displayed in Bangladesh time (`NEXT_PUBLIC_APP_TIMEZONE`, default `Asia/Dhaka`), so admins, doctors and patients see the same slot times.
 
 ## Demo credentials
 
 | Role | Email | Password |
 | --- | --- | --- |
-| Admin | backend `SUPER_ADMIN_EMAIL` (default `admin@healthcare.dev`) | backend `SUPER_ADMIN_PASSWORD` (default `Admin@12345`) |
 | Doctor | `doctor@healthcare.dev` | `Doctor@12345` |
 | Patient | `patient@healthcare.dev` | `Patient@12345` |
 
-Created by the backend's idempotent seed (`npm run seed`). Stripe test card: `4242 4242 4242 4242`, any future expiry, any CVC.
+Created by the backend's idempotent seed (`npm run seed`). The admin account is configured privately through the backend environment variables. Stripe test card: `4242 4242 4242 4242`, any future expiry, any CVC.
