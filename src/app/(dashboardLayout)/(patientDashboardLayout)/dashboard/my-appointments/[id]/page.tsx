@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import AppointmentDetails from "@/components/module/Patient/PatientAppointment/AppointmentDetails";
 import { getAppointmentById } from "@/services/patient/appointment.service";
 import { IAppointment } from "@/types/appointments.interface";
 import { notFound } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Appointment Details",
+};
 
 interface AppointmentDetailPageProps {
   params: Promise<{

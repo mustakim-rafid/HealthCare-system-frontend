@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,10 +16,30 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const siteDescription =
+  "Access trusted healthcare services with Health Care. Find the right doctor, book video consultations, receive electronic prescriptions, make secure payments, and manage your health journey through a smart, role-based healthcare platform.";
+
 export const metadata: Metadata = {
-  title: "Health Care – Book Doctor Appointments & Video Consultations",
-  description:
-    "Access trusted healthcare services with Health Care. Find the right doctor, book video consultations, receive electronic prescriptions, make secure payments, and manage your health journey through a smart, role-based healthcare platform.",
+  title: {
+    default: "Health Care – Book Doctor Appointments & Video Consultations",
+    template: "%s | Health Care",
+  },
+  description: siteDescription,
+  applicationName: "Health Care",
+  openGraph: {
+    type: "website",
+    siteName: "Health Care",
+    title: "Health Care – Book Doctor Appointments & Video Consultations",
+    description: siteDescription,
+    locale: "en_US",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f7fafc" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1a24" },
+  ],
 };
 
 export default function RootLayout({
@@ -34,7 +54,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >

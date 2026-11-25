@@ -12,7 +12,7 @@ import { Metadata } from "next"
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Health Care – Dashboard",
+  title: "Dashboard",
 }
 
 const DashboardLayout = ({ children }: {

@@ -14,7 +14,7 @@ import Link from "next/link";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Health Care – NGOs",
+  title: "NGOs",
 }
 
 const NGOsPage = () => {

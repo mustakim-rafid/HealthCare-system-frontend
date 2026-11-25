@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import ChangePasswordForm from "@/components/module/Auth/ChangePasswordFrom";
 import {
   Card,
@@ -6,6 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Change Password",
+};
 
 const ChangePasswordPage = () => {
   return (

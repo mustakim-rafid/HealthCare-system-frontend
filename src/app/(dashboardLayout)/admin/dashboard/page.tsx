@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AppointmentBarChart } from "@/components/shared/AppointmentBarChart";
 import { AppointmentPieChart } from "@/components/shared/AppointmentPieChart";
 import { DashboardSkeleton } from "@/components/shared/skeleton/DashboardSkeleton";
@@ -5,6 +6,10 @@ import { StatsCard } from "@/components/shared/StatCard";
 import { getDashboardMetaData } from "@/services/meta/dashboard.service";
 import { IAdminDashboardMeta } from "@/types/meta.interface";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+};
 
 async function AdminDashboardContent() {
   const result = await getDashboardMetaData();

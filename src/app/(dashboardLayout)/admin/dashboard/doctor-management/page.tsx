@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import DoctorManagement from "@/components/module/Admin/doctor/DoctorManagement";
 import TablePagination from "@/components/shared/TablePagination";
 import { getAllDoctors } from "@/services/admin/doctorManagement";
 import { getAllSpecialities } from "@/services/admin/specialityManagement";
 import { formatQueryParams } from "@/utils/formatters";
+
+export const metadata: Metadata = {
+  title: "Doctor Management",
+};
 
 const DoctorManagementPage = async ({
   searchParams,

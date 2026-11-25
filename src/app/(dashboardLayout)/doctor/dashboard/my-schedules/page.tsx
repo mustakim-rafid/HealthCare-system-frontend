@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import MySchedulesFilters from "@/components/module/Doctor/MySchedules/MyScheduleFilters";
 import MySchedulesHeader from "@/components/module/Doctor/MySchedules/MyScheduleHeader";
 import MySchedulesTable from "@/components/module/Doctor/MySchedules/MyScheduleTable";
@@ -6,6 +7,10 @@ import TablePagination from "@/components/shared/TablePagination";
 import { getAvailableSchedules, getDoctorOwnSchedules } from "@/services/doctor/doctorSchedule.service";
 import { formatQueryParams } from "@/utils/formatters";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "My Schedules",
+};
 
 interface DoctorMySchedulesPageProps {
   searchParams: Promise<{

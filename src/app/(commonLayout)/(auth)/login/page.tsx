@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Health Care – Login",
+  title: "Login",
 }
 
 const LoginPage = async ({

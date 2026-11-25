@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import ScheduleForm from "@/components/module/Admin/schedule/ScheduleForm";
 import ScheduleTable from "@/components/module/Admin/schedule/ScheduleTable";
 import ManagementPageHeader from "@/components/shared/ManagementPageHeader";
@@ -5,6 +6,10 @@ import RefreshButton from "@/components/shared/RefreshButton";
 import TablePagination from "@/components/shared/TablePagination";
 import { getAllSchedules } from "@/services/admin/scheduleManagement";
 import { formatQueryParams } from "@/utils/formatters";
+
+export const metadata: Metadata = {
+  title: "Schedule Management",
+};
 
 const ScheduleManagementPage = async ({
   searchParams,

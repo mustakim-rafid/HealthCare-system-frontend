@@ -1,5 +1,10 @@
+import type { Metadata } from "next";
 import MyProfile from "@/components/module/MyProfile/MyProfile";
 import { getUserInfoForProfile } from "@/services/auth/getUserInfo";
+
+export const metadata: Metadata = {
+  title: "My Profile",
+};
 
 const MyProfilePage = async () => {
   const userInfo = await getUserInfoForProfile();
