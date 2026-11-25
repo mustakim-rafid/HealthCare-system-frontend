@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Loader2, MessageSquare, Send } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

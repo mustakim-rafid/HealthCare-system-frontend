@@ -3,7 +3,8 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { format, formatDistanceToNowStrict } from "date-fns";
+import { formatDistanceToNowStrict } from "date-fns";
+import { format, TZ_LABEL } from "@/utils/datetime";
 import { toast } from "sonner";
 import {
   AlertTriangle,
@@ -184,7 +185,7 @@ const AppointmentDetails = ({ appointment }: { appointment: IAppointment }) => {
                 <p className="text-xl font-semibold">{format(start, "EEEE, MMMM d, yyyy")}</p>
                 <p className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="h-4 w-4" aria-hidden />
-                  {format(start, "h:mm a")} – {format(end, "h:mm a")} <span className="text-xs">(your local time)</span>
+                  {format(start, "h:mm a")} – {format(end, "h:mm a")} <span className="text-xs">({TZ_LABEL})</span>
                 </p>
               </div>
               {isActive && start > new Date() && <AppointmentCountdown appointmentDateTime={start} />}

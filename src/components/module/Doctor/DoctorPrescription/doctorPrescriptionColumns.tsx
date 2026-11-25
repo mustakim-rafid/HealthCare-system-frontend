@@ -2,7 +2,7 @@
 import { Column } from "@/components/shared/ManagementTable";
 import { Badge } from "@/components/ui/badge";
 import { IPrescription } from "@/types/prescription.interface";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 
 export const doctorPrescriptionColumns: Column<IPrescription>[] = [
   {

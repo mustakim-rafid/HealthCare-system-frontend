@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { doctorPrescriptionColumns } from "./doctorPrescriptionColumns";

@@ -3,13 +3,12 @@
 import { Column } from "@/components/shared/ManagementTable";
 import { Badge } from "@/components/ui/badge";
 import { IDoctorSchedule } from "@/types/schedule.interface";
-import { format, isBefore, startOfDay } from "date-fns";
+import { isBefore } from "date-fns";
+import { format } from "@/utils/datetime";
 
 const isPastSchedule = (schedule: IDoctorSchedule) => {
-  return isBefore(
-    new Date(schedule.schedule?.startDateTime || ""),
-    startOfDay(new Date())
-  );
+  // A slot that has already started can no longer be booked
+  return isBefore(new Date(schedule.schedule?.startDateTime || ""), new Date());
 };
 
 export const myScheduleColumns: Column<IDoctorSchedule>[] = [

@@ -2,6 +2,7 @@
 
 import { useState, useActionState, useEffect, useTransition } from "react";
 import { format } from "date-fns";
+import { TZ_LABEL } from "@/utils/datetime";
 
 import { createSchedule } from "@/services/admin/scheduleManagement";
 
@@ -127,6 +128,10 @@ export default function ScheduleForm() {
         />
         <InputFieldError field="endDate" state={state as IErrorMessageState} />
       </Field>
+
+      <p className="text-xs text-muted-foreground">
+        Times are in Bangladesh time ({TZ_LABEL}). Slots are 30 minutes each, e.g. 15:00–19:00 creates 3:00 PM to 6:30 PM.
+      </p>
 
       {/* START TIME */}
       <Field>

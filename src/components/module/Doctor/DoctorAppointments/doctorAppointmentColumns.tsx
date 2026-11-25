@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   AppointmentStatus,
   IAppointment, STATUS_META } from "@/types/appointments.interface";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import AppointmentCountdown from "../../Patient/PatientAppointment/AppointmentCountdown";
 
 export const doctorAppointmentColumns: Column<IAppointment>[] = [

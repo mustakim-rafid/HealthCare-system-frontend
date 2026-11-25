@@ -65,7 +65,7 @@ async function AdminDashboardContent() {
         />
         <StatsCard
           title="Total Revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
+          value={`৳${totalRevenue.toLocaleString()}`}
           iconName="DollarSign"
           description="Total earnings"
           iconClassName="bg-emerald-100"

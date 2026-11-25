@@ -13,7 +13,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { createDoctorSchedule, getAvailableSchedules } from "@/services/doctor/doctorSchedule.service";
 import { ISchedule } from "@/types/schedule.interface";
-import { format } from "date-fns";
+import { dayKey, format, fromDayKey } from "@/utils/datetime";
 import { Calendar } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -102,7 +102,7 @@ export default function BookScheduleDialog({
 
     if (availableSchedules.length > 0) {
       availableSchedules.forEach((schedule) => {
-        const date = format(new Date(schedule.startDateTime), "yyyy-MM-dd");
+        const date = dayKey(schedule.startDateTime);
         if (!grouped[date]) {
           grouped[date] = [];
         }
@@ -145,7 +145,7 @@ export default function BookScheduleDialog({
               {groupedSchedules.map(([date, daySchedules]) => (
                 <div key={date}>
                   <h3 className="font-medium mb-3">
-                    {format(new Date(date), "EEEE, MMMM d, yyyy")}
+                    {format(fromDayKey(date), "EEEE, MMMM d, yyyy")}
                   </h3>
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {daySchedules.map((schedule) => (

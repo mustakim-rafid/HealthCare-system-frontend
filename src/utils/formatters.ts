@@ -1,3 +1,5 @@
+import { format as tzFormat } from "@/utils/datetime";
+
 export const getInitials = (name: string): string => {
   const words = name.trim().split(" ");
   if (words.length === 1) return words[0][0].toUpperCase();
@@ -31,45 +33,10 @@ export const formatQueryParams = (params: {
     .join("&");
 };
 
-export const formatDateTime = (date: Date | string): string => {
-  const d = new Date(date);
+// Always rendered in the app timezone (see utils/datetime.ts) so server and browser agree.
+export const formatDateTime = (date: Date | string): string => tzFormat(date, "d MMMM, yyyy h:mm a");
 
-  const day = d.getUTCDate();
-  const month = d.toLocaleString("default", { month: "long", timeZone: "UTC" });
-  const year = d.getUTCFullYear();
+export const formatDateOnly = (date: Date | string): string => tzFormat(date, "d MMMM, yyyy");
 
-  const hours24 = d.getUTCHours();
-  const minutes = d.getUTCMinutes();
-
-  const ampm = hours24 >= 12 ? "PM" : "AM";
-  const hours12 = hours24 % 12 || 12;
-
-  const formattedMinutes = minutes.toString().padStart(2, "0");
-
-  return `${day} ${month}, ${year} ${hours12}:${formattedMinutes} ${ampm}`;
-};
-
-export const formatDateOnly = (date: Date | string): string => {
-  const d = new Date(date);
-  const day = d.getUTCDate();
-  const month = d.toLocaleString("default", { month: "long", timeZone: "UTC" });
-  const year = d.getUTCFullYear();
-  return `${day} ${month}, ${year}`;
-};
-
-export const formatTimeRange = (start: Date | string, end: Date | string): string => {
-  const s = new Date(start);
-  const e = new Date(end);
-
-  const format = (d: Date) => {
-    const hours24 = d.getUTCHours();
-    const minutes = d.getUTCMinutes();
-    const ampm = hours24 >= 12 ? "PM" : "AM";
-    const hours12 = hours24 % 12 || 12;
-    const mm = minutes.toString().padStart(2, "0");
-    return `${hours12}:${mm} ${ampm}`;
-  };
-
-  return `${format(s)} - ${format(e)}`;
-};
-
+export const formatTimeRange = (start: Date | string, end: Date | string): string =>
+  `${tzFormat(start, "h:mm a")} - ${tzFormat(end, "h:mm a")}`;

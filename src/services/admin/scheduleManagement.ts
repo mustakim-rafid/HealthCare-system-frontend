@@ -22,7 +22,6 @@ export const createSchedule = async (
       return getZodErrorResponse(zodResponse);
     }
 
-    console.log(zodResponse)
 
     const res = await serverFetch.post(`/schedule`, {
       headers: {
@@ -31,10 +30,9 @@ export const createSchedule = async (
       body: JSON.stringify(zodResponse.data),
     })
     const result = await res.json()
-    console.log(result)
     return result
   } catch (error: any) {
-    console.log(error);
+    console.error(error);
     return {
       success: false,
       error: error.message || "Something went wrong",
@@ -50,7 +48,7 @@ export const getAllSchedules = async (queryParams: string) => {
     const result = await res.json();
     return result;
   } catch (error: any) {
-    console.log(error);
+    console.error(error);
     return {
       success: false,
       error: error.message || "Something went wrong",
@@ -64,7 +62,7 @@ export const deleteSchedule = async (id: string) => {
     const result = await res.json();
     return result;
   } catch (error: any) {
-    console.log(error);
+    console.error(error);
     return {
       success: false,
       error: error.message || "Something went wrong",
@@ -83,7 +81,7 @@ export async function getScheduleById(id: string) {
         const result = await response.json();
         return result;
     } catch (error: any) {
-        console.log(error);
+        console.error(error);
         return {
             success: false,
             message: `${process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'}`

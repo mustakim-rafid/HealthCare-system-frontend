@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createPrescription } from "@/services/patient/prescription.service";
 import { IAppointment } from "@/types/appointments.interface";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";

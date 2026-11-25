@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import { serverFetch } from "@/lib/serverFetch";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

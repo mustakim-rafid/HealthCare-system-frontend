@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import {
   AppointmentStatus,
   IAppointment, STATUS_META } from "@/types/appointments.interface";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import {
   Calendar,
   Clock,

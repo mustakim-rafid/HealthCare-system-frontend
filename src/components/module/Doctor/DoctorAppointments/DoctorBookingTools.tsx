@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import { toast } from "sonner";
 import { CalendarClock, Link2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";

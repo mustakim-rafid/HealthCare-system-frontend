@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { createAppointment } from "@/services/patient/appointment.service";
 import { IDoctor } from "@/types/doctor.interface";
 import { ISchedule } from "@/types/schedule.interface";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import {
   Calendar,
   CheckCircle2,

@@ -3,7 +3,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { IPrescription } from "@/types/prescription.interface";
-import { format } from "date-fns";
+import { format } from "@/utils/datetime";
 import { Calendar, Clock, FileText, User } from "lucide-react";
 
 interface PatientPrescriptionsListProps {
