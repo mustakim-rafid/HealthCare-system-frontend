@@ -4,13 +4,19 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const subscribe = () => () => {};
 
 export function ModeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  // true on the client, false during SSR — avoids a hydration mismatch
+  // without calling setState inside an effect.
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
 
   if (!mounted) {
     return (
