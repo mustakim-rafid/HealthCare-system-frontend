@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import PatientsFilter from "@/components/module/Admin/PatientsManagement/PatientsFilter";
 import PatientsTable from "@/components/module/Admin/PatientsManagement/PatientsTable";
 import ManagementPageHeader from "@/components/shared/ManagementPageHeader";
@@ -6,6 +7,10 @@ import TablePagination from "@/components/shared/TablePagination";
 import { getPatients } from "@/services/admin/patientManagement";
 import { formatQueryParams } from "@/utils/formatters";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Patient Management",
+};
 
 const AdminPatientsManagementPage = async ({
   searchParams,

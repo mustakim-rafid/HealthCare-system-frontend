@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { AppointmentPieChart } from "@/components/shared/AppointmentPieChart";
 import { DashboardSkeleton } from "@/components/shared/skeleton/DashboardSkeleton";
 import { StatsCard } from "@/components/shared/StatCard";
 import { getDashboardMetaData } from "@/services/meta/dashboard.service";
 import { IPatientDashboardMeta } from "@/types/meta.interface";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Patient Dashboard",
+};
 
 export const dynamic = "force-dynamic";
 

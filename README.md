@@ -1,150 +1,63 @@
-# 🏥 Health Care System – Frontend
+# Health Care — Frontend
 
-This is the **frontend application** for the **Health Care System**, a modern healthcare platform that connects **Patients**, **Doctors**, and **Admins** for seamless online medical services.  
-Patients can find doctors, book video consultations, receive electronic prescriptions, and manage appointments — all through a secure and intuitive interface.
+Next.js 16 app for a healthcare appointment platform with three roles — **Admin**, **Doctor**, **Patient**.
+Patients find a doctor, book a slot, pay securely with Stripe, get reminders and join the consultation on Google Meet.
 
----
+- **Backend repo:** HealthCare-system-backend (Express + Prisma + PostgreSQL) — API docs at `<API>/api/v1/docs`
 
-## 🚀 Project Overview
+## Latest features
 
-The frontend is built using **Next.js (App Router)** to deliver a fast, scalable, and SEO-friendly user experience.  
-It communicates with a robust backend API to support **role-based dashboards**, **real-time appointment workflows**, and **AI-powered doctor suggestions**.
+- **Booking with payment:** pick a doctor's free slot → slot is held while you pay (Stripe Checkout) → booking is confirmed only after the server verifies the payment. Booked slots disappear from availability; double booking is impossible.
+- **Booking details page:** live status, hold countdown and *Pay now*, Google Meet link shown only after confirmation, **Join now** button from 10 minutes before start, **Add to calendar** (Google Calendar + `.ics`), cancellation with the refund policy, review after completion.
+- **Postponement:** doctors postpone with a message and a new slot; patients accept or cancel for a full refund. Per-booking **message history** between doctor and patient.
+- **Doctor tools:** share/update the Meet link (validated), postpone, message the patient, valid status changes only (in progress, completed, no-show, cancelled).
+- **Notifications:** bell with unread counter in every dashboard, real-time updates (SSE with polling fallback), mark as read / mark all as read, full history page with pagination, toasts with an *Open* action. Reminder 10 minutes before the consultation links straight to the booking.
+- **Global search** in every dashboard: `Ctrl/⌘ + K`, debounced, stale requests cancelled, role-scoped grouped suggestions (bookings, doctors, patients, specialities, pages), keyboard navigation, loading/empty states and a full results page (`/search?q=`).
+- **Admin appointments page** with status filter, search and pagination.
+- **Auth:** silent session renewal with the refresh token, automatic redirect to login when the session expires, forgot/reset password.
+- **Branding & UX:** new SVG medical logo, favicon/app icon, calm teal brand palette, light/dark/system theme, branded 404 page, page titles and Open Graph tags, skip-to-content link, labelled icon buttons.
 
-### 🔑 Key Highlights
-- Role-based UI for **Admin**, **Doctor**, and **Patient**
-- Secure **JWT-based authentication**
-- **AI-driven doctor recommendation**
-- **Video consultation booking flow**
-- **Electronic prescription management**
-- Fully **responsive** and mobile-friendly design
+## Tech stack
 
----
+Next.js 16 (App Router, Server Actions, Turbopack) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui (Radix) · cmdk · react-hook-form + Zod · date-fns · Sonner · Recharts
 
-## 🔍 Features Overview
-
-### 🔐 Authentication & Authorization
-- Login, logout, and token refresh
-- Role-based routing (Admin / Doctor / Patient)
-- Protected pages and layouts
-- Persistent authentication using cookies
-
----
-
-### 👤 User & Profile Management
-- View and update profile details
-- Upload profile photo
-- Role-specific profile information
-- Admin access to system users
-
----
-
-### 🩺 Doctor Discovery & AI Suggestion
-- Browse doctors by speciality
-- View detailed doctor profiles
-- **AI-powered doctor suggestion** based on symptoms
-- Ratings and reviews display
-
----
-
-### 📅 Appointment & Consultation
-- Patients can:
-  - View doctor availability
-  - Book video consultation appointments
-  - Choose schedule and payment method
-- Doctors can:
-  - View appointments
-  - Update appointment status
-- Appointment history for Patients and Doctors
-
----
-
-### 💊 Electronic Prescription
-- Doctors can issue digital prescriptions
-- Patients can view and download prescriptions
-- Secure prescription history tracking
-
----
-
-### ⭐ Reviews & Ratings
-- Patients can submit reviews after consultation
-- Public review listing for doctors
-- Rating-based trust indicators
-
----
-
-### 📊 Dashboards
-- **Admin Dashboard**
-  - System metrics
-  - User and appointment insights
-- **Doctor Dashboard**
-  - Appointments
-  - Schedules
-  - Prescriptions
-- **Patient Dashboard**
-  - Appointments
-  - Prescriptions
-  - Reviews
-
----
-
-### 💳 Payment Experience
-- Pay-later appointment option
-- Secure and user-friendly booking flow
-- Payment status visibility
-
----
-
-## 🧰 Technology Stack
-
-- **Next.js (App Router)** – Modern React framework with SSR & RSC
-- **TypeScript** – Strongly typed frontend
-- **Tailwind CSS** – Utility-first responsive styling
-- **ShadCN UI** – Accessible UI components
-- **JWT Authentication** – Secure session handling
-- **Zod** – validation
-
----
-
-## 🛠️ Setup Instructions
-
-### 1. Clone the repository
+## Getting started
 
 ```bash
-git clone https://github.com/mustakim-rafid/HealthCare-system-frontend
-cd HealthCare-system-frontend
-```
-
-### 2. Install dependencies
-```
+cp .env.example .env     # point NEXT_PUBLIC_BACKEND_URL at the API, copy the JWT secrets from the backend
 npm install
-# or if using pnpm
-pnpm install
-# or bun
-bun add
+npm run dev              # http://localhost:3000
 ```
 
-### 3. Create a .env file in the root directory:
-```
-NEXT_PUBLIC_BACKEND_URL=
+| Variable | Notes |
+| --- | --- |
+| `NEXT_PUBLIC_BACKEND_URL` | API base URL, e.g. `https://api.example.com/api/v1` (no hard-coded URLs in code) |
+| `ACCESS_TOKEN_SECRET` / `REFRESH_TOKEN_SECRET` | Same values as the backend; used to read the role from the httpOnly cookie for route guards |
 
-# jwt secrets
-ACCESS_TOKEN_SECRET=
-REFRESH_TOKEN_SECRET=
-```
+Scripts: `dev`, `build`, `start`, `lint`, `format`, `format:check`. CI (`.github/workflows/ci.yml`) runs lint and type-check on pull requests.
 
-### 4. Run the development server
-```
-npm run dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## How it talks to the API
 
-### 5. Build for production
-```
-npm run build
-npm start
-```
----
-## Thanks.
+Data is fetched in Server Components / Server Actions through `src/lib/serverFetch.ts`, which forwards the httpOnly `accessToken` cookie, with tag-based caching and revalidation after mutations. Small route handlers under `src/app/api/*` proxy search (supports `AbortController`) and notifications (including the SSE stream). `src/proxy.ts` guards routes by role, renews expired access tokens and redirects to `/login?redirect=…` when the session is gone.
+
+## User flows
+
+- **Patient:** Consultation → doctor → choose slot → *Confirm & Pay* → Stripe → payment success page → booking details (Meet link, calendar, messages) → reminder → *Join now* → review.
+- **Doctor:** *My schedules* → offer slots → notification on a confirmed booking → *Appointments* → open booking → share Meet link / postpone / message → mark completed → prescription.
+- **Admin:** *Schedules* → create slots → manage doctors, patients, admins, specialities → *Appointments* to oversee every booking.
+
+## Booking status lifecycle
+
+`Awaiting payment → Confirmed → In progress → Completed` (or `No-show`); `Confirmed ⇄ Postponed`; any active booking can become `Cancelled`. Unpaid holds expire after 30 minutes; finished consultations complete automatically. Patients can cancel paid bookings up to 24 hours before the start for a full refund.
+
+All times are stored in UTC and displayed in the viewer's local time.
+
+## Demo credentials
+
+| Role | Email | Password |
+| --- | --- | --- |
+| Admin | backend `SUPER_ADMIN_EMAIL` (default `admin@healthcare.dev`) | backend `SUPER_ADMIN_PASSWORD` (default `Admin@12345`) |
+| Doctor | `doctor@healthcare.dev` | `Doctor@12345` |
+| Patient | `patient@healthcare.dev` | `Patient@12345` |
+
+Created by the backend's idempotent seed (`npm run seed`). Stripe test card: `4242 4242 4242 4242`, any future expiry, any CVC.

@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import AppointmentsList from "@/components/module/Patient/PatientAppointment/AppointmentsList";
 import { getMyAppointments } from "@/services/patient/appointment.service";
 import { IAppointment } from "@/types/appointments.interface";
+
+export const metadata: Metadata = {
+  title: "My Appointments",
+};
 
 export default async function MyAppointmentsPage() {
   const response = await getMyAppointments();

@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import DoctorAppointmentsTable from "@/components/module/Doctor/DoctorAppointments/DoctorAppointmentTable";
 import { TableSkeleton } from "@/components/shared/skeleton/TableSkeleton";
 import { getMyAppointments } from "@/services/patient/appointment.service";
 import { IAppointment } from "@/types/appointments.interface";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Appointments",
+};
 
 async function AppointmentsContent() {
   const response = await getMyAppointments();

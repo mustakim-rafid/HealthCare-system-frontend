@@ -1,12 +1,6 @@
 "use client";
 
-import { Menu, Search, Settings } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import {
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarInput,
-} from "@/components/ui/sidebar";
+import { Menu } from "lucide-react";
 import { UserInfo } from "@/types/user.interface";
 import {
   DropdownMenu,
@@ -22,22 +16,17 @@ import { ModeToggle } from "@/components/ui/mode-toggler";
 import LogoutButton from "@/components/shared/LogoutButton";
 import { capitalize } from "@/utils/formatters";
 import Link from "next/link";
+import GlobalSearch from "./GlobalSearch";
+import NotificationBell from "./NotificationBell";
 
 const DashboardNavbarContent = ({ userInfo }: { userInfo: UserInfo }) => {
   return (
     <div className="flex flex-1 min-w-0 items-center justify-between gap-3">
-      <form className="w-full">
-        <SidebarGroup className="py-0">
-          <SidebarGroupContent className="relative">
-            <Label htmlFor="search" className="sr-only">
-              Search
-            </Label>
-            <SidebarInput id="search" placeholder="Search" className="pl-8" />
-            <Search className="pointer-events-none absolute top-1/2 left-2 size-4 -translate-y-1/2 opacity-50 select-none" />
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </form>
-      <div className="flex gap-3">
+      <div className="min-w-0 flex-1">
+        <GlobalSearch role={userInfo.role} />
+      </div>
+      <div className="flex items-center gap-2">
+        <NotificationBell allHref="/notifications" />
         <DropdownMenu>
           <DropdownMenuTrigger className="cursor-pointer" asChild>
             <Avatar className="h-8 w-8 rounded-full">

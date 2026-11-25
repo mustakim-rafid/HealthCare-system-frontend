@@ -12,7 +12,7 @@ import { Metadata } from "next"
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Health Care – Dashboard",
+  title: "Dashboard",
 }
 
 const DashboardLayout = ({ children }: {
@@ -33,7 +33,10 @@ const DashboardLayout = ({ children }: {
           </div>
         </header>
         <Separator />
-        {children}
+        {/* SidebarInset already renders <main>, so the skip-link target is a div */}
+        <div id="main-content" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

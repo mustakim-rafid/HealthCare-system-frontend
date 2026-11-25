@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import PatientPrescriptionsList from "@/components/module/Patient/PatientPrescription/PatientPrescriptionList";
 import { getMyPrescriptions } from "@/services/patient/prescription.service";
 import { IPrescription } from "@/types/prescription.interface";
+
+export const metadata: Metadata = {
+  title: "My Prescriptions",
+};
 
 export default async function MyPrescriptionsPage() {
   const response = await getMyPrescriptions();

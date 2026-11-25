@@ -11,7 +11,7 @@ import {
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Health Care – Register",
+  title: "Register",
 }
 
 const RegisterPage = () => {

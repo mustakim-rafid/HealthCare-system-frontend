@@ -4,37 +4,49 @@ import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
+
+const subscribe = () => () => {};
 
 export function ModeToggle() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => setMounted(true), []);
+  const { resolvedTheme, setTheme } = useTheme();
+  // true on the client, false during SSR — avoids a hydration mismatch
+  // without calling setState inside an effect.
+  const mounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
 
   if (!mounted) {
     return (
-      <Button variant="outline" disabled className="opacity-50">
-        <Moon />
+      <Button
+        variant="outline"
+        disabled
+        aria-label="Toggle color theme"
+        className="opacity-50"
+      >
+        <Moon aria-hidden="true" />
       </Button>
     );
   }
 
+  // resolvedTheme reflects the actual theme when the preference is "system".
+  const isDark = resolvedTheme === "dark";
+
   const handleThemeChange = () => {
-    if (theme === "dark") {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
+    setTheme(isDark ? "light" : "dark");
   };
 
   return (
     <Button
       variant={"outline"}
       onClick={handleThemeChange}
+      aria-label={isDark ? "Switch to light theme" : "Switch to dark theme"}
+      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
       className="dark:hover:bg-primary cursor-pointer h-8 w-8"
     >
-      {theme === "dark" ? <Moon /> : <Sun />}
+      {isDark ? <Moon aria-hidden="true" /> : <Sun aria-hidden="true" />}
     </Button>
   );
 }

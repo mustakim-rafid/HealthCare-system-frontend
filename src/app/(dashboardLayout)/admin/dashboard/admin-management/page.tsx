@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import AdminsFilter from "@/components/module/Admin/AdminsManagement/AdminsFilter";
 import AdminsManagementHeader from "@/components/module/Admin/AdminsManagement/AdminsManagementHeader";
 import AdminsTable from "@/components/module/Admin/AdminsManagement/AdminsTable";
@@ -6,6 +7,10 @@ import TablePagination from "@/components/shared/TablePagination";
 import { getAdmins } from "@/services/admin/adminManagement";
 import { formatQueryParams } from "@/utils/formatters";
 import { Suspense } from "react";
+
+export const metadata: Metadata = {
+  title: "Admin Management",
+};
 
 const AdminAdminsManagementPage = async ({
   searchParams,

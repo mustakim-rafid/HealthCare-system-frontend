@@ -55,7 +55,7 @@ const LoginForm = ({ redirect }: { redirect: string }) => {
           <div className="flex items-center">
             <FieldLabel htmlFor="password">Password</FieldLabel>
             <a
-              href="#"
+              href="/forgot-password"
               className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
             >
               Forgot your password?
@@ -72,6 +72,7 @@ const LoginForm = ({ redirect }: { redirect: string }) => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
               className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500"
             >
               {showPassword ? <EyeIcon size={18} /> : <EyeOffIcon size={18} />}

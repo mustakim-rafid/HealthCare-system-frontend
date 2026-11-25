@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import AppointmentConfirmation from "@/components/module/Patient/PatientAppointment/AppointmentConfirmation";
 import { getDoctorById } from "@/services/admin/doctorManagement";
 import { getScheduleById } from "@/services/admin/scheduleManagement";
 import { IDoctor } from "@/types/doctor.interface";
 import { ISchedule } from "@/types/schedule.interface";
 import { notFound } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Book Appointment",
+};
 
 interface BookAppointmentPageProps {
   params: Promise<{

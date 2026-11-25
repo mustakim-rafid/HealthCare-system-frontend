@@ -10,7 +10,9 @@ const CommonLayout = ({ children }: {
   return (
     <div>
         <PublicNavbar />
-        {children}
+        <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+          {children}
+        </main>
         <PublicFooter />
     </div>
   )
