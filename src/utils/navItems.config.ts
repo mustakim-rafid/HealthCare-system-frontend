@@ -35,6 +35,10 @@ export const adminNavMainItems: INavMain[] = [
         title: "Schedules",
         url: "/admin/dashboard/schedule-management",
       },
+      {
+        title: "Appointments",
+        url: "/admin/dashboard/appointments-management",
+      },
     ],
   },
 ];
